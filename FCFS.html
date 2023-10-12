@@ -1,13 +1,21 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-    href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Oswald:wght@300;400;500&family=Playfair+Display&family=Poppins:wght@300;400&display=swap"
-    rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Lato:wght@300;400&family=Oswald:wght@300;400;500&family=Playfair+Display&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
+
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=0.68, user-scalable=no">
 
 <div class="container">
+    <div class="mycard">
+        <div style="display: flex;align-items:center;justify-content: space-around;">
+            <div style="font-size:42px;font-weight:600">FCFS Solver</div>
+            <div style="font-family: 'Cedarville Cursive', cursive;font-size:25px;color:#C70039;font-weight: 400;">By Vivek</div>
+        </div>
+    </div>
     <div class="mycard">
         <h3 class="mt-1">Enter Number of Processes</h3>
         <div class="row">
@@ -55,6 +63,24 @@
         <h3 class="mt-1">Grantt Chart</h3>
         <div id='grantt'></div>
     </div>
+
+    <div class="mycard">
+        <h3>Manipulate Time Lines</h3>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideAT">
+            <label class="form-check-label" for="hideAT">Arrival Time</label>
+        </div>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideAVL">
+            <label class="form-check-label" for="hideAVL">Available Time</label>
+        </div>   
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideCT">
+            <label class="form-check-label" for="hideCT" >Completion Time</label>
+        </div>     
+    </div>
 </div>
 <style>
     body {
@@ -90,8 +116,18 @@
         color: white;
     }
 
+    .middle {
+        position: absolute;
+        bottom: -35px;
+        /* right: 5px; */
+        background-color:#FFB000;
+        color: white;
+    }
+
     .start,
-    .end {
+    .end,
+    .middle
+     {
         width: 30px;
         height: 30px;
         display: flex;
@@ -101,6 +137,9 @@
         font-family: Lato;
         box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     }
+
+   
+
 
     #grantt {
         position: relative;
@@ -113,7 +152,7 @@
     }
 
     .process {
-        width: 100px;
+        width: 120px;
         position: relative;
         height: 120px;
         display: flex;
@@ -209,8 +248,9 @@
                 let currentWT = currentTAT - at[i];
                 var newProcessDiv = $(`<div class="process"><div style='font-size:30px;font-weight:500'>${currentPid}</div>TAT : ${currentTAT} <br> BT : ${currentWT}</div>`);
                 var newStartDiv = $(`<div class="start">${currentAt}</div>`);
+                var newmiddleDiv = $(`<div class="middle">${currentAt}</div>`);
                 var newEndDiv = $(`<div class="end">${currentCt}</div>`);
-                newProcessDiv.append(newStartDiv, newEndDiv);
+                newProcessDiv.append(newStartDiv,newmiddleDiv,newEndDiv);
                 $('#grantt').append(newProcessDiv);
             }
     }
@@ -286,6 +326,30 @@
             }
         });   
 
+
+        $('#hideCT').change(function() {
+            if (!this.checked) {
+                $('.end').css('display', 'none');
+            } else {
+                $('.end').css('display', 'flex');
+            }
+        });
+
+        $('#hideAT').change(function() {
+            if (!this.checked) {
+                $('.start').css('display', 'none');
+            } else {
+                $('.start').css('display', 'flex');
+            }
+        });
+
+        $('#hideAVL').change(function() {
+            if (!this.checked) {
+                $('.middle').css('display', 'none');
+            } else {
+                $('.middle').css('display', 'flex');
+            }
+        });
 
     })
 </script>
