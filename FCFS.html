@@ -199,7 +199,7 @@
         for (let i = 0; i < n; i++) {
             let minIdx = i;
             for (let j = i + 1; j < n; j++) {
-                if (at[minIdx] > at[j]) {
+                if (at[minIdx] > at[j] || (at[minIdx]==at[j] && bt[minIdx]>bt[j])) {
                     minIdx = j;
                 }
             }
