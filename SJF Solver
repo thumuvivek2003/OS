@@ -1,0 +1,369 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Lato:wght@300;400&family=Oswald:wght@300;400;500&family=Playfair+Display&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=0.68, user-scalable=no">
+
+<div class="container">
+    <div class="mycard">
+        <div style="display: flex;align-items:center;justify-content: space-around;">
+            <div style="font-size:42px;font-weight:600">SJF Solver</div>
+            <div style="font-family: 'Cedarville Cursive', cursive;font-size:25px;color:#C70039;font-weight: 400;">By Vivek</div>
+        </div>
+    </div>
+    <div class="mycard">
+        <h3 class="mt-1">Enter Number of Processes</h3>
+        <div class="row">
+            <div class="col-8">
+                <input  type="number" id='n_processess' value="4" class="form-control w-100" id="proccess" name="proccess" step="1" pattern="\d+" placeholder="Number of Processes" required>
+            </div>
+            <div class="col-4">
+                <button  id='proceed' class="btn btn-primary w-100">Proceed</button>
+            </div>
+        </div>
+    </div>
+    <div class="mycard">
+        <h3 class="mt-1">Given Problem</h3>
+        <table id='given' class="table  text-center">
+            <thead>
+                <tr class='bg-dark text-white'>
+                    <th>PID</th>
+                    <th>AT</th>
+                    <th>BT</th>
+                </tr>
+            </thead>
+            <tbody id="givenbody">
+            </tbody>
+        </table>
+        <!-- <button id='calculate' class="mx-auto rounded p-1 d-block w-25 bg-success text-white">Calculate</button> -->
+    </div>
+
+    <div class="mycard">
+        <h3 class="mt-1">After Solving</h3>
+        <table id='solved' class="table  text-center">
+            <thead>
+                <tr class='bg-dark text-white'>
+                    <th>PID</th>
+                    <th>AT</th>
+                    <th>BT</th>
+                    <th>CT</th>
+                    <th>TAT</th>
+                    <th>WT</th>
+                </tr>
+            </thead>
+            <tbody id="solvedbody"></tbody>
+        </table>
+    </div>
+    <div class="mycard">
+        <h3 class="mt-1">Grantt Chart</h3>
+        <div id='grantt'></div>
+    </div>
+
+    <div class="mycard">
+        <h3>Change Time Lines</h3>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideAT">
+            <label class="form-check-label" for="hideAT">Arrival Time</label>
+        </div>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideAVL">
+            <label class="form-check-label" for="hideAVL">CPU Available Time</label>
+        </div>   
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" checked type="checkbox" id="hideCT">
+            <label class="form-check-label" for="hideCT" >Completion Time</label>
+        </div>     
+    </div>
+</div>
+<style>
+    body {
+        font-family: Poppins;
+    }
+    .mycard{
+        padding:8px;
+        margin-top:8px;
+        margin-bottom:8px;
+        border-radius:4px;
+        box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    }
+    *{
+        /* border:1px black solid; */
+    }
+    #given{
+        margin-top:8px;
+        margin-bottom:8px;
+    }
+    .start {
+        position: absolute;
+        bottom: -35px;
+        left: 5px;
+        background-color: #186F65;
+        color: white;
+    }
+
+    .end {
+        position: absolute;
+        bottom: -35px;
+        right: 5px;
+        background-color: #C70039;
+        color: white;
+    }
+
+    .middle {
+        position: absolute;
+        bottom: -35px;
+        /* right: 5px; */
+        background-color:#FFB000;
+        color: white;
+    }
+
+    .start,
+    .end,
+    .middle
+     {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 3px;
+        font-family: Lato;
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    }
+
+   
+
+
+    #grantt {
+        position: relative;
+        display: flex;
+        flex-wrap:wrap;
+        justify-content:start;
+        align-items: center;
+        height:auto;
+        padding-bottom: 15px;
+    }
+
+    .process {
+        width: 140px;
+        position: relative;
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        border: 0.3px #aaa solid;
+        margin-left: 15px;
+        border-radius: 8px;
+        margin-top:25px;
+        margin-bottom:25px;
+        white-space: nowrap;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    }
+    table,td,th,input{
+        text-align:center;
+    }
+</style>
+
+
+<script>
+    function start(at,bt){
+        if(at.length != bt.length){return false;}
+        $("#givenbody").html("");
+        $("#solvedbody").html("");
+        $("#grantt").html("");
+        let n = at.length;
+        var pid = [];
+        for (var i = 0; i < n; i++) {
+            pid.push("P" + (i + 1));
+        }
+        for(i=0;i<n;i++){
+            var newRow = $("<tr>");
+            newRow.append(`</td>`);
+            newRow.append(`<td>${pid[i]}</td>`);
+            newRow.append(`<td><input type='number' class='atimes form-control' step='1' pattern='\\d+' placeholder='Enter AT' value=${at[i]} required></td>`);
+            newRow.append(`<td><input type='number' class='btimes form-control' step='1' pattern='\\d+' placeholder='Enter BT' value=${bt[i]} required></td>`);
+            $("#givenbody").append(newRow);
+        }
+        var  calculate = $("<button id='calculate' class='mx-auto rounded p-1 d-block w-100 bg-success text-white'>Calculate</button>");
+        $("#givenbody").append(calculate);
+        // Sorting Pid, BT, AT according to arrival time
+        for (let i = 0; i < n; i++) {
+            let minIdx = i;
+            for (let j = i + 1; j < n; j++) {
+                if (at[minIdx] > at[j]) {
+                    minIdx = j;
+                }
+            }
+            if (minIdx !== i) {
+                // Swap AT, PID, and BT using temporary variables
+                let tempAt = at[i];
+                at[i] = at[minIdx];
+                at[minIdx] = tempAt;
+
+                let tempPid = pid[i];
+                pid[i] = pid[minIdx];
+                pid[minIdx] = tempPid;
+
+                let tempBt = bt[i];
+                bt[i] = bt[minIdx];
+                bt[minIdx] = tempBt;
+            }
+        }
+        let tat = new Array(n).fill(0);
+        let wt = new Array(n).fill(0);
+        let ct = new Array(n).fill(0);
+        for (let i = 0; i < n; i++) {
+            if (i === 0) {
+                ct[0] = at[0] + bt[0];
+            } else {
+                let minIdx = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (at[j] <= ct[i - 1] && bt[j] < bt[minIdx]) {
+                        minIdx = j;
+                }
+            }
+                [at[minIdx], at[i]] = [at[i], at[minIdx]];
+                [bt[minIdx], bt[i]] = [bt[i], bt[minIdx]];
+                [pid[minIdx], pid[i]] = [pid[i], pid[minIdx]];
+                ct[i] = bt[i] + Math.max(ct[i - 1], at[i]);
+            }
+            tat[i] = ct[i] - at[i];
+            wt[i] = tat[i] - bt[i];
+            var newRow = $("<tr>");
+            newRow.append(`</td>`);
+            newRow.append(`<td>${pid[i]}</td>`);
+            newRow.append(`<td>${at[i]}</td>`);
+            newRow.append(`<td>${bt[i]}</td>`);
+            newRow.append(`<td>${ct[i]}</td>`);
+            newRow.append(`<td>${tat[i]}</td>`);
+            newRow.append(`<td>${wt[i]}</td>`);
+            $("#solvedbody").append(newRow);
+        }
+        
+        for (let i = 0; i < pid.length; i++) {
+                let currentPid = pid[i];
+                let currentAt = at[i];
+                let currentCt = ct[i];
+                let currentTAT = ct[i] - at[i];
+                let currentWT = currentTAT - bt[i];
+                var newProcessDiv = $(`<div class="process"><div style='font-size:30px;font-weight:500'>${currentPid}</div>TAT : ${currentTAT} <br> WT : ${currentWT}</div>`);
+                var newStartDiv = $(`<div class="start">${currentAt}</div>`);
+                var newmiddleDiv = $(`<div class="middle">${currentAt+currentWT}</div>`);
+                var newEndDiv = $(`<div class="end">${currentCt}</div>`);
+                newProcessDiv.append(newStartDiv,newmiddleDiv,newEndDiv);
+                $('#grantt').append(newProcessDiv);
+            }
+    }
+//    start([3,5,0,5,4],[4,3,2,1,3]);
+   start([3,1,4,0,2],[1,4,2,6,3]);
+    // start([2,0,1,2],[1,5,2,3]);
+    function makeGrantt(){
+        for (let i = 0; i < pid.length; i++) {
+            let currentPid = pid[i];
+            let currentAt = at[i];
+            let currentCt = ct[i];
+            let currentTAT = ct[i] - at[i];
+            let currentWT = currentTAT - at[i];
+            var newProcessDiv = $(`<div class="process"><div style='font-size:30px;font-weight:500'>${currentPid}</div>TAT : ${currentTAT} <br> BT : ${currentWT}</div>`);
+            var newStartDiv = $(`<div class="start">${currentAt}</div>`);
+            var newEndDiv = $(`<div class="end">${currentCt}</div>`);
+            newProcessDiv.append(newStartDiv, newEndDiv);
+            $('#grantt').append(newProcessDiv);
+        }
+    }
+    $(document).ready(function(){
+        $("#proceed").click(function(){
+            n_processess = $("#n_processess").val();
+            $("#givenbody").html("");
+            $("#solvedbody").html("");
+            $("#grantt").html("");
+            if(/^\d+$/.test(n_processess)){
+                for(i=0;i<n_processess;i++){
+                    var newRow = $("<tr>");
+                    newRow.append(`<td>P${i+1}</td>`);
+                    newRow.append("<td><input type='number' class='atimes form-control' step='1' pattern='\\d+' placeholder='Enter AT' required></td>");
+                    newRow.append("<td><input type='number' class='btimes form-control' step='1' pattern='\\d+' placeholder='Enter BT' required></td>");
+                    $("#givenbody").append(newRow);
+                }
+                var  calculate = $("<button id='calculate' class='mx-auto rounded p-1 d-block w-100 bg-success text-white'>Calculate</button>");
+                $("#givenbody").append(calculate);
+            }
+            else{
+                alert("Enter Valid Number of Processes");
+                $("#n_processess").focus();
+            }
+        });
+
+        $(document).on("click", "#calculate", function() {
+            atimes = [];
+            btimes = [];
+            stopped = false
+            $(".atimes").each(function(){
+                atime = $(this).val();
+                if (/^\d+$/.test(atime)) {
+                    atimes.push(parseInt(atime));
+                } else {
+                    $(this).focus();
+                    alert("Enter AT value here");
+                    stopped = true;
+                    return false;
+                }
+            });
+            if(!stopped){
+                $(".btimes").each(function(){
+                    btime = $(this).val();
+                    if (/^\d+$/.test(btime)) {
+                        btimes.push(parseInt(btime));
+                    } else {
+                        $(this).focus();
+                        alert("Enter   BT value here");
+                        stopped = true;
+                        return false;
+                    }
+                });
+            }
+            if(!stopped){
+                start(atimes,btimes);
+                console.log(atimes,btimes);
+            }
+        });   
+
+
+        $('#hideCT').change(function() {
+            if (!this.checked) {
+                $('.end').css('display', 'none');
+            } else {
+                $('.end').css('display', 'flex');
+            }
+        });
+
+        $('#hideAT').change(function() {
+            if (!this.checked) {
+                $('.start').css('display', 'none');
+            } else {
+                $('.start').css('display', 'flex');
+            }
+        });
+
+        $('#hideAVL').change(function() {
+            if (!this.checked) {
+                $('.middle').css('display', 'none');
+            } else {
+                $('.middle').css('display', 'flex');
+            }
+        });
+
+    })
+</script>
+
+
+
