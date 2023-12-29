@@ -1,0 +1,44 @@
+def main():
+    n = 4
+    remain = n
+
+    wt = 0
+    tat = 0
+
+
+    at = [0, 1, 2, 4]
+    bt = [5, 4, 2, 1]
+    rt = bt.copy()
+
+
+    tq = 2
+
+    print("\n\nProcess\t|Turnaround Time|Waiting Time\n\n")
+    t = cnt = 0
+
+    while remain != 0:
+        if rt[cnt] <= tq and rt[cnt] > 0:
+            t += rt[cnt]
+            rt[cnt] = 0
+            flag = 1
+        elif rt[cnt] > 0:
+            rt[cnt] -= tq
+            t += tq
+
+        if rt[cnt] == 0 and flag == 1:
+            remain -= 1
+            print(f"P[{cnt + 1}]\t|\t{t - at[cnt]}\t|\t{t - at[cnt] - bt[cnt]}")
+            wt += t - at[cnt] - bt[cnt]
+            tat += t - at[cnt]
+            flag = 0
+
+        if cnt == n-1:
+          cnt = 0
+        elif at[cnt+1] <= t:
+          cnt += 1
+        else : cnt = 0
+    print("\nAverage Waiting Time= {:.2f}".format(wt / n))
+    print("Avg Turnaround Time = {:.2f}".format(tat / n))
+
+if __name__ == "__main__":
+    main()
