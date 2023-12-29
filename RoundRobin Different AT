@@ -1,44 +1,67 @@
-def main():
-    n = 4
-    remain = n
+# Round Robin for different arrival times
 
-    wt = 0
-    tat = 0
+at = [0,1,2,4]
+
+bt = [5,4,2,1]
+btr = [5,4,2,1]
+q = [0]
+ptr = 0
+
+tq = 2
+timer = 0
+
+n = 4
+
+included = [False]*n
+included[0] = True
+
+ct = [0]*n
+tat = [0]*n
+wt = [0]*n
 
 
-    at = [0, 1, 2, 4]
-    bt = [5, 4, 2, 1]
-    rt = bt.copy()
 
 
-    tq = 2
 
-    print("\n\nProcess\t|Turnaround Time|Waiting Time\n\n")
-    t = cnt = 0
 
-    while remain != 0:
-        if rt[cnt] <= tq and rt[cnt] > 0:
-            t += rt[cnt]
-            rt[cnt] = 0
-            flag = 1
-        elif rt[cnt] > 0:
-            rt[cnt] -= tq
-            t += tq
+while(ptr<len(q)):
+  if btr[q[ptr]] == 0:
+    ptr += 1
+  elif btr[q[ptr]] - tq <= 0 :
+    timer += btr[q[ptr]]
+    btr[q[ptr]] = 0
 
-        if rt[cnt] == 0 and flag == 1:
-            remain -= 1
-            print(f"P[{cnt + 1}]\t|\t{t - at[cnt]}\t|\t{t - at[cnt] - bt[cnt]}")
-            wt += t - at[cnt] - bt[cnt]
-            tat += t - at[cnt]
-            flag = 0
 
-        if cnt == n-1:
-          cnt = 0
-        elif at[cnt+1] <= t:
-          cnt += 1
-        else : cnt = 0
-    print("\nAverage Waiting Time= {:.2f}".format(wt / n))
-    print("Avg Turnaround Time = {:.2f}".format(tat / n))
+    currIdx = q[ptr]
+    ct[currIdx] = timer
+    tat[currIdx] = ct[currIdx] - at[currIdx]
+    wt[currIdx] = tat[currIdx] - bt[currIdx] 
 
-if __name__ == "__main__":
-    main()
+    for currIdx in range(currIdx+1,n):
+      if not included[currIdx] and  at[currIdx] <= timer:
+        included[currIdx] = True
+        q.append(currIdx)
+        currIdx += 1
+    ptr += 1
+  else :
+    timer += tq
+    btr[q[ptr]] -= tq
+    currIdx = q[ptr]
+    for currIdx in range(currIdx+1,n):
+      if not included[currIdx] and  at[currIdx] <= timer:
+        included[currIdx] = True
+        q.append(currIdx)
+        currIdx += 1
+    q.append(q[ptr])
+    ptr += 1
+
+
+df = DataFrame({"Pid":[i for i in range(1,n+1)],
+                    "AT":at,
+                    "BT":bt,
+                    "CT":ct,
+                    "TAT":tat,
+                    "WT":wt})
+
+print("Ready Queue : ",q)
+df
