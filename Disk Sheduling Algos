@@ -1,3 +1,6 @@
+#https://colab.research.google.com/drive/18KxtKwTFfvwpVmqzqg71qazAutImg5uw#scrollTo=TGm0c3rDRdK7
+
+
 from matplotlib import pyplot as plt
 import math
 def FCFS(sequence,start):
